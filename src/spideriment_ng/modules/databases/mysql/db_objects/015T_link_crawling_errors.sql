@@ -1,0 +1,31 @@
+CREATE TABLE IF NOT EXISTS `link_crawling_errors` (
+    `link_crawling_error_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `link_crawling_error_link_id` BIGINT UNSIGNED NOT NULL,
+    `link_crawling_error_reason` ENUM(
+        'fetch_connection_error',
+        'fetch_not_found',
+        'fetch_forbidden',
+        'fetch_server_error',
+        'fetch_too_many_redirects',
+        'fetch_uncategorized_error',
+        'robots_forbidden',
+        'robots_delay_too_long',
+        'robots_uncategorized_error',
+        'parse_unsupported_type',
+        'parse_cut_off_content',
+        'parse_invalid_format',
+        'parse_invalid_content',
+        'parse_forbidden',
+        'parse_uncategorized_error',
+        'validation_url_problem',
+        'validation_document_problem',
+        'validation_uncategorized_error',
+        'final_url_not_crawlable',
+        'uncategorized_error',
+        'unknown_error'
+    ) NOT NULL,
+    `link_crawling_error_occurred_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY(`link_crawling_error_id`),
+    UNIQUE KEY(`link_crawling_error_link_id`),
+    CONSTRAINT `fk_link_crawling_error_link` FOREIGN KEY (`link_crawling_error_link_id`) REFERENCES `links`(`link_id`) ON UPDATE RESTRICT ON DELETE RESTRICT
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci

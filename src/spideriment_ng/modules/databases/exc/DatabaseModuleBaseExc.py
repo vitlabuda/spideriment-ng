@@ -1,0 +1,42 @@
+#!/bin/false
+
+# Copyright (c) 2022 Vít Labuda. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+# following conditions are met:
+#  1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
+#     disclaimer.
+#  2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the
+#     following disclaimer in the documentation and/or other materials provided with the distribution.
+#  3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote
+#     products derived from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+from typing import Final
+import abc
+from spideriment_ng.modules.exc.ModuleBaseExc import ModuleBaseExc
+
+
+class DatabaseModuleBaseExc(ModuleBaseExc, metaclass=abc.ABCMeta):
+    def __init__(self, error_message: str, caused_by_unacceptable_redirected_url: bool, caused_by_no_more_links_to_crawl: bool):
+        ModuleBaseExc.__init__(self, error_message)
+
+        # The exception must not be caused by two things at once!
+        assert (not caused_by_unacceptable_redirected_url) or (not caused_by_no_more_links_to_crawl)
+
+        self._caused_by_unacceptable_redirected_url: Final[bool] = caused_by_unacceptable_redirected_url
+        self._caused_by_no_more_links_to_crawl: Final[bool] = caused_by_no_more_links_to_crawl
+
+    def is_caused_by_unacceptable_redirected_url(self) -> bool:
+        return self._caused_by_unacceptable_redirected_url
+
+    def is_caused_by_no_more_links_to_crawl(self) -> bool:
+        return self._caused_by_no_more_links_to_crawl

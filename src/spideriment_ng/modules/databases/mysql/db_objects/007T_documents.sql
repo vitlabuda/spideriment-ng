@@ -1,0 +1,21 @@
+CREATE TABLE IF NOT EXISTS `documents` (
+    `document_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `document_original_link_id` BIGINT UNSIGNED NOT NULL,
+    `document_final_link_id` BIGINT UNSIGNED NOT NULL,
+    `document_filetype_id` BIGINT UNSIGNED NOT NULL,
+    `document_language_id` BIGINT UNSIGNED NOT NULL,
+    `document_author_id` BIGINT UNSIGNED NOT NULL,
+    `document_title` TINYTEXT NOT NULL,
+    `document_description` TEXT NOT NULL,
+    `document_crawled_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY(`document_id`),
+    UNIQUE KEY(`document_original_link_id`),
+    UNIQUE KEY(`document_final_link_id`),
+    CONSTRAINT `fk_document_original_link` FOREIGN KEY (`document_original_link_id`) REFERENCES `links`(`link_id`) ON UPDATE RESTRICT ON DELETE RESTRICT,
+    CONSTRAINT `fk_document_final_link` FOREIGN KEY (`document_final_link_id`) REFERENCES `links`(`link_id`) ON UPDATE RESTRICT ON DELETE RESTRICT,
+    CONSTRAINT `fk_document_filetype` FOREIGN KEY (`document_filetype_id`) REFERENCES `filetypes`(`filetype_id`) ON UPDATE RESTRICT ON DELETE RESTRICT,
+    CONSTRAINT `fk_document_language` FOREIGN KEY (`document_language_id`) REFERENCES `languages`(`language_id`) ON UPDATE RESTRICT ON DELETE RESTRICT,
+    CONSTRAINT `fk_document_author` FOREIGN KEY (`document_author_id`) REFERENCES `authors`(`author_id`) ON UPDATE RESTRICT ON DELETE RESTRICT,
+    FULLTEXT(`document_title`),
+    FULLTEXT(`document_description`)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci

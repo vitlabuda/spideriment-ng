@@ -1,0 +1,51 @@
+#!/bin/false
+
+# Copyright (c) 2022 Vít Labuda. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+# following conditions are met:
+#  1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
+#     disclaimer.
+#  2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the
+#     following disclaimer in the documentation and/or other materials provided with the distribution.
+#  3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote
+#     products derived from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+from typing import Final, Sequence
+import re
+from spideriment_ng.config.FilterRule import FilterRule
+from spideriment_ng.worker.workertask._normalizers._FilterRuleChecker import _FilterRuleChecker
+from spideriment_ng.worker.workertask._normalizers.exc.TextBlockedByFilterRuleExc import TextBlockedByFilterRuleExc
+
+
+class TextNormalizer:
+    def __init__(self, filter_rules: Sequence[FilterRule], max_length: int):
+        assert (max_length > 0)
+
+        self._filter_rule_checker: Final[_FilterRuleChecker] = _FilterRuleChecker(filter_rules)
+        self._max_length: Final[int] = max_length
+
+    def use(self, text: str) -> str:
+        """
+        :raises NormalizerBaseExc
+        """
+
+        text = self._normalize_whitespace(text)
+
+        if not self._filter_rule_checker.check_string(text):
+            raise TextBlockedByFilterRuleExc(text)
+
+        # If the string is longer than the maximum allowed length, it is cut off
+        return text[0:self._max_length].strip()
+
+    def _normalize_whitespace(self, text: str) -> str:
+        return re.sub(r'\s+', ' ', text).strip()

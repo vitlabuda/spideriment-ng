@@ -1,0 +1,222 @@
+# ----- Spideriment-NG example configuration file -----
+
+
+
+
+
+[generic]
+# May be used by some modules which need to work with shared resources to identify themselves (e.g. the 'mysql' database
+#  module inserts this name into the `active_crawlers` table when it connects to the database).
+# Keep in mind that the instance name is shared between all worker worker processes, and since each worker process
+#  instantiates its own modules, conflicts could arise if this fact was to be ignored.
+instance_name = "my_instance"
+
+# If set to 'true', debug messages informing about worker processes/tasks startups and shutdowns, module instances
+#  being created or destroyed, crawling successes, errors, delays etc. are printed to stdout.
+print_debug_log_messages = false
+
+# If set to 'true', garbage collection is forced by calling 'gc.collect()' from time to time.
+force_garbage_collection = false
+
+# The URLs used to bootstrap the crawling process.
+start_urls = [
+    "https://en.wikipedia.org/wiki/Main_Page",
+    "https://en.wiktionary.org/wiki/Wiktionary:Main_Page",
+    "https://github.com/",
+    "https://www.google.com/",
+]
+
+
+
+
+
+[limits]
+worker_processes = 4
+worker_tasks_per_process = 8  # Each worker task is an asyncio task.
+
+max_document_size = 1048576  # in bytes; = 1 MiB
+max_robots_txt_size = 65536  # in bytes; = 64 kiB
+request_timeout = 10  # in seconds
+max_redirects = 10
+max_crawling_delay = 600  # in seconds; = 10 minutes
+
+# If an URL is longer than the configured maximum length (in characters), it is considered invalid, whereas all the
+#  other document properties (titles, descriptions, content snippets, ...) are simply "cut off".
+# When setting these limits, beware of your database's settings and limitations (e.g. VARCHAR/TEXT column lengths).
+#  (These default limits are tested to work with the default tables created and then used by the 'mysql' module).
+url_max_length = 512  # Applies to both webpage and image URLs.
+title_max_length = 192
+description_max_length = 512
+keyword_max_length = 32
+author_max_length = 48
+content_snippet_max_length = 1536
+link_text_max_length = 64
+img_alt_text_max_length = 48
+img_title_max_length = 48
+
+max_keywords_per_document = 48
+max_content_snippets_per_document = 40
+max_content_snippets_per_type_per_document = 4  # Content snippets may be of different types/priorities (headings, emphasized text, regular text etc.)
+max_links_per_document = 144
+max_images_per_document = 40  # The program does not download images - it only stores their source URLs, alts and titles (if applicable).
+
+
+
+
+
+[filtering]
+# Filters enable you to discard crawled documents or their parts which do not meet your requirements using a regular expression.
+# Filter rules are evaluated in the order they are defined. Each filter rule is a 2-item list composed of
+#  ["<action>", "<regex>"].
+# If an "allow" rule's regex matches a given document part, no further rules are evaluated and it is considered valid.
+#  Similarly, if no rule's regex matches the given document part, it is considered valid and the crawling process
+#  carries on.
+# The behaviour of "block" rules depends on the document part they are validating. "block" rules whose regex matches a
+#  document's URL, title, description, language or author, cause the whole document to be discarded, whereas "block"
+#  rules matching a keyword, content snippet, link (its URL or text) or image (its URL, alt text or title text) cause
+#  only the particular part to be discarded - the rest of the document is not affected by them.
+
+url_filters = []
+url_host_filters = [
+    ["block", "\\.(mil|gov)$"],
+    ["block", "gov\\.[a-z]+$"],
+    ["block", "archive\\.[a-z]+$"],
+    ["block", "m\\.(wikimedia|wikipedia|wiktionary|wikiquote|wikibooks|wikisource|wikinews|wikiversity|wikidata)\\.org$"],
+]
+url_path_filters = [
+    ["block", "\\.(jpg|jpeg|bmp|gif|png|tif|tiff|svg|heic|heif|ico|raw|xcf|psd|zps|cdr|mp3|wav|wma|flac|ogg|aac|m4a|mp4|avi|wmv|flv|webm|mkv|3gp|m4v|mov|zip|rar|7z|tar|gz|bz2|xz|z|tgz|tbz2|txz|tz|ggb|pdf|tex|doc|docx|docm|rtf|odt|xls|xlsx|xlsm|ods|ppt|pptx|pptm|odp|sql|csv|tsv|json|iso|img|vmdk|qcow|qcow2|scr|bin|elf|exe|vbs|vba|app|msi|msu|cab|dmg|rpm|deb|pkg|appimage|apk|bat|cmd|sh|bash|dll|so|ko|cur|ani|lnk|sys|drv|pak|tmp|bak|dmp)$"],
+]
+url_query_filters = []
+title_filters = [
+    ["block", "^$"],  # Block documents with no title
+]
+description_filters = []
+keyword_filters = []
+language_filters = []
+author_filters = []
+content_snippet_filters = []
+link_text_filters = []
+
+img_url_filters = []
+img_url_host_filters = [
+    ["block", "\\.(mil|gov)$"],
+    ["block", "gov\\.[a-z]+$"],
+    ["block", "archive\\.[a-z]+$"],
+    ["block", "m\\.(wikimedia|wikipedia|wiktionary|wikiquote|wikibooks|wikisource|wikinews|wikiversity|wikidata)\\.org$"],
+]
+img_url_path_filters = [
+    ["allow", "\\.(jpg|jpeg|gif|png|webp|bmp|svg)$"],
+    ["block", ".*"],
+]
+img_url_query_filters = [
+    ["block", ".+"],  # Images whose URL's query part is not empty are blocked
+]
+img_alt_text_filters = []
+img_title_filters = []
+
+
+
+# Query string parameters whose "keys" are matching one of the following regexes are removed from URLs.
+remove_query_parameters_matching_regex = [
+    "^utm_.+$",
+    "^fbclid$"
+]
+
+# If set to 'true', URLs which contain ports other than http/80 or https/443 are allowed to be crawled.
+allow_nonstandard_ports = false
+
+
+
+
+
+[fetcher]
+# Fetcher modules are responsible for fetching crawled webpages & robots.txt files from a certain source. Thanks to
+#  high-level abstraction, the source does not have to necessarily be the Internet.
+
+# Currently implemented modules: 'internet'
+module_name = "internet"
+
+# '{program_version}' is replaced by the program's version automatically.
+module_options.user_agent = "Mozilla/5.0 (X11; Linux x86_64) Spideriment-NG/{program_version} (web spider; respects robots.txt)"
+
+# Supported proxy types: 'http', 'https', 'socks4', 'socks4h', 'socks5', 'socks5h'
+# Is is RECOMMENDED to use the crawler in companion with Tor, so, for example, your IP does not get placed in
+#  blocklists due to the program accessing something it should not: 'socks5h://<tor host>:9050'
+module_options.proxy = "socks5h://127.0.0.1:9050"
+
+
+
+
+
+[database]
+# Database modules are responsible for providing URLs to crawl, saving crawled webpages etc. Thanks to high-level
+#  abstraction, modules saving data for example to files, both SQL and no-SQL databases, certain cloud storages etc.
+#  can be implemented.
+
+# Currently implemented modules: 'mysql'
+module_name = "mysql"
+
+# The 'mysql' module does not support recrawling of documents (a URL may be crawled only once) and ensures that only
+#  one worker task globally (!) can crawl a specific URL at the same time. However, this behaviour is not required
+#  and/or enforced by the rest of this program in any way - a fully working database module which does not behave
+#  in the aforementioned ways could be implemented.
+# Keep in mind that the 'mysql' module uses the 'GET_LOCK()' and 'RELEASE_LOCK()' MySQL functions, so it is not suitable
+#  for use with clustered databases!
+# The 'mysql' module may be used with both MySQL and MariaDB databases.
+# The definitions of the tables the 'mysql' module uses to store data are located in the
+#  'src/spideriment_ng/modules/databases/mysql/db_objects' directory.
+module_options.mysql_host = "127.0.0.1"
+module_options.mysql_port = 3306
+module_options.mysql_user = "spideriment_user"  # Remember to adjust this!
+module_options.mysql_password = "spideriment_password"  # Remember to adjust this!
+module_options.mysql_db = "spideriment_db"  # Remember to adjust this!
+module_options.connection_pool_size = 8  # Per worker process, but shared between each process's worker tasks!
+
+
+
+
+
+[document_parsers]
+# Document parser modules are responsible for parsing and extracting content from fetched files. Thanks to high-level
+#  abstraction, modules dealing with for example HTML, plaintext, PDF, DOCX etc. documents can be implemented.
+# Specifying multiple document parser modules for different document file types is possible. The modules are used in
+#  the order of their priorities (the higher number, the higher priority).
+# Currently implemented modules: 'html'
+
+    [document_parsers.100]  # Priority: 100
+    module_name = "html"
+
+
+
+
+
+[robot_caches]
+# Robot cache modules are responsible for caching contents of fetched 'robots.txt' files, so they do not have to be
+#  fetched each time a file from a specific host is fetched, slowing the program's operation down.
+# Specifying multiple robot cache modules is possible. The modules are used in the order of their priorities (the
+#  higher number, the higher priority). The first module to successfully provide a cached robots.txt file is the last
+#  one to be used for a specific crawled URL. If no cache can provide the file, it is fetched and saved to all the
+#  configured modules.
+# Currently implemented modules: 'memory', 'memcached'
+
+    [robot_caches.200]  # Priority: 200
+    module_name = "memory"  # Caches the data inside the program (in a dictionary).
+
+    module_options.max_entries = 1024
+
+
+    [robot_caches.100]  # Priority: 100
+    module_name = "memcached"
+
+    module_options.memcached_host = "127.0.0.1"
+    module_options.memcached_port = 11211
+    module_options.connection_pool_size = 8  # Per worker process, but shared between each process's worker tasks!
+
+
+    # A single module may be more than once (if it makes sense, of course):
+    #   [robot_caches.50]  # Priority: 50
+    #   module_name = "memcached"
+    #
+    #   module_options.memcached_host = "memcached-node.local"
+    #   module_options.memcached_port = 11211
+    #   module_options.connection_pool_size = 8  # Per worker process, but shared between each process's worker tasks!
