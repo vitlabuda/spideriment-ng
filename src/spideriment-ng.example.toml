@@ -75,6 +75,7 @@ max_images_per_document = 40  # The program does not download images - it only s
 #  document's URL, title, description, language or author, cause the whole document to be discarded, whereas "block"
 #  rules matching a keyword, content snippet, link (its URL or text) or image (its URL, alt text or title text) cause
 #  only the particular part to be discarded - the rest of the document is not affected by them.
+# All the regex matches are carried out in a CASE-INSENSITIVE manner!
 
 url_filters = []
 url_host_filters = [
@@ -117,6 +118,7 @@ img_title_filters = []
 
 
 # Query string parameters whose "keys" are matching one of the following regexes are removed from URLs.
+# All the regex matches are carried out in a CASE-INSENSITIVE manner!
 remove_query_parameters_matching_regex = [
     "^utm_.+$",
     "^fbclid$"
