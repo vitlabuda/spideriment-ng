@@ -16,6 +16,9 @@ CREATE TABLE IF NOT EXISTS `documents` (
     CONSTRAINT `fk_document_filetype` FOREIGN KEY (`document_filetype_id`) REFERENCES `filetypes`(`filetype_id`) ON UPDATE RESTRICT ON DELETE RESTRICT,
     CONSTRAINT `fk_document_language` FOREIGN KEY (`document_language_id`) REFERENCES `languages`(`language_id`) ON UPDATE RESTRICT ON DELETE RESTRICT,
     CONSTRAINT `fk_document_author` FOREIGN KEY (`document_author_id`) REFERENCES `authors`(`author_id`) ON UPDATE RESTRICT ON DELETE RESTRICT,
+    INDEX(`document_filetype_id`),
+    INDEX(`document_language_id`),
+    INDEX(`document_author_id`),
     FULLTEXT(`document_title`),
     FULLTEXT(`document_description`)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci

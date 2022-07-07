@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS `content_snippets` (
     `content_snippet_text` TEXT NOT NULL,
     PRIMARY KEY(`content_snippet_id`),
     CONSTRAINT `fk_content_snippet_document` FOREIGN KEY(`content_snippet_document_id`) REFERENCES `documents`(`document_id`) ON UPDATE RESTRICT ON DELETE RESTRICT,
-    INDEX(`content_snippet_document_id`, `content_snippet_type`),
+    INDEX(`content_snippet_document_id`),
+    INDEX(`content_snippet_type`),
     FULLTEXT(`content_snippet_text`)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci

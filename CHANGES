@@ -3,3 +3,6 @@
 
 [1.0.1 @ 2022-07-07]
 - Optimized the `sng_fn__get_link_to_crawl_from_links` MySQL function
+
+[1.0.2 @ 2022-07-07]
+- Added indexes to relevant columns in some tables

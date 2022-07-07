@@ -46,13 +46,13 @@ max_crawling_delay = 600  # in seconds; = 10 minutes
 #  (These default limits are tested to work with the default tables created and then used by the 'mysql' module).
 url_max_length = 512  # Applies to both webpage and image URLs.
 title_max_length = 192
-description_max_length = 512
+description_max_length = 1024
 keyword_max_length = 32
 author_max_length = 48
 content_snippet_max_length = 1536
-link_text_max_length = 64
-img_alt_text_max_length = 48
-img_title_max_length = 48
+link_text_max_length = 96
+img_alt_text_max_length = 96
+img_title_max_length = 96
 
 max_keywords_per_document = 48
 max_content_snippets_per_document = 40
