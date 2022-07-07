@@ -1,0 +1,5 @@
+[1.0.0 @ 2022-07-04]
+- Initial release
+
+[1.0.1 @ 2022-07-07]
+- Optimized the `sng_fn__get_link_to_crawl_from_links` MySQL function
