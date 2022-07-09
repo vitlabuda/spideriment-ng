@@ -28,7 +28,7 @@ from spideriment_ng.logger.LoggerFactory import LoggerFactory
 
 @final
 class SpiderimentConstants(UninstantiableClassMixin):
-    PROGRAM_VERSION: Final[str] = "1.0.2"
+    PROGRAM_VERSION: Final[str] = "1.0.3"
 
     PROGRAM_TERMINATION_SIGNALS: Final[FrozenSet[signal.Signals]] = frozenset({signal.SIGTERM, signal.SIGINT, signal.SIGHUP})
     WORKER_PROCESS_TERMINATION_SIGNAL: Final[signal.Signals] = signal.SIGUSR1

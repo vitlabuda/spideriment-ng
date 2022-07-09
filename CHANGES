@@ -6,3 +6,6 @@
 
 [1.0.2 @ 2022-07-07]
 - Added indexes to relevant columns in some tables
+
+[1.0.3 @ 2022-07-09]
+- Fixed MySQLDatabaseModule's exception handling context

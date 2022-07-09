@@ -56,6 +56,20 @@ from spideriment_ng.modules.databases.mysql.exc.MySQLUnacceptableRedirectedURLEx
 from spideriment_ng.modules.databases.mysql.exc.MySQLLockingFailureExc import MySQLLockingFailureExc
 
 
+# Decorator
+def _mysql_async_exception_handling_context(func: Callable) -> Callable:
+    @functools.wraps(func)
+    async def _async_exception_handling_wrapper_function(self, *args, **kwargs) -> Any:
+        try:
+            return await func(self, *args, **kwargs)
+        except (MySQLDatabaseModuleBaseExc, AssertionError) as e:
+            raise e
+        except Exception as f:  # It is not clear what exceptions does 'aiomysql' raise
+            raise MySQLCommunicationFailureExc(self._mysql_host, self._mysql_port, str(f))
+
+    return _async_exception_handling_wrapper_function
+
+
 class MySQLDatabaseModule(DatabaseModuleIface):
     class _ModuleState(enum.Enum):
         UNPREPARED = 10
@@ -77,19 +91,6 @@ class MySQLDatabaseModule(DatabaseModuleIface):
     @classmethod
     def get_module_info(cls) -> ModuleInfo:
         return cls._MODULE_INFO
-
-    @staticmethod  # Decorator
-    def _mysql_exception_handling_context(func: Callable) -> Callable:
-        @functools.wraps(func)
-        def _exception_handling_wrapper_function(self, *args, **kwargs) -> Any:
-            try:
-                return func(self, *args, **kwargs)
-            except (MySQLDatabaseModuleBaseExc, AssertionError) as e:
-                raise e
-            except Exception as f:  # It is not clear what exceptions does 'aiomysql' raise
-                raise MySQLCommunicationFailureExc(self._mysql_host, self._mysql_port, str(f))
-
-        return _exception_handling_wrapper_function
 
     def __init__(self, mysql_client: aiomysql.Pool, mysql_host: str, mysql_port: int, instance_name: str):
         self._mysql_client: Final[aiomysql.Pool] = mysql_client
@@ -143,7 +144,7 @@ class MySQLDatabaseModule(DatabaseModuleIface):
         if pending_exception is not None:
             raise MySQLDisconnectionFailureExc(self._mysql_host, self._mysql_port, str(pending_exception))
 
-    @_mysql_exception_handling_context
+    @_mysql_async_exception_handling_context
     async def _prepare_database_on_client_connection(self) -> None:
         assert (self._state == self.__class__._ModuleState.UNPREPARED)
 
@@ -183,7 +184,7 @@ class MySQLDatabaseModule(DatabaseModuleIface):
             )
             success_flag_carrier.set(True)  # If all the previous code succeeds... (i.e. it does not raise an exception)
 
-    @_mysql_exception_handling_context
+    @_mysql_async_exception_handling_context
     async def _cleanup_database_on_client_disconnection(self) -> None:
         assert (self._state == self.__class__._ModuleState.OPERATIONAL)
 
@@ -208,7 +209,7 @@ class MySQLDatabaseModule(DatabaseModuleIface):
 
         self._active_crawler_id = None
 
-    @_mysql_exception_handling_context
+    @_mysql_async_exception_handling_context
     async def announce_start_urls(self, validated_absolute_start_urls: Sequence[URLContainer]) -> None:
         assert (self._state == self.__class__._ModuleState.OPERATIONAL)
         assert (len(validated_absolute_start_urls) > 0)
@@ -224,7 +225,7 @@ class MySQLDatabaseModule(DatabaseModuleIface):
                 )
             success_flag_carrier.set(True)  # If all the previous code succeeds... (i.e. it does not raise an exception)
 
-    @_mysql_exception_handling_context
+    @_mysql_async_exception_handling_context
     async def get_url_to_crawl(self) -> CrawledURLHandleIface:
         assert (self._state == self.__class__._ModuleState.OPERATIONAL)
         assert (self._active_crawler_id is not None)
@@ -264,7 +265,7 @@ class MySQLDatabaseModule(DatabaseModuleIface):
             redirected=False
         )
 
-    @_mysql_exception_handling_context
+    @_mysql_async_exception_handling_context
     async def announce_redirected_url(self, original_url: CrawledURLHandleIface, validated_absolute_redirected_url: URLContainer) -> CrawledURLHandleIface:
         assert (self._state == self.__class__._ModuleState.OPERATIONAL)
         assert (self._active_crawler_id is not None)
@@ -312,7 +313,7 @@ class MySQLDatabaseModule(DatabaseModuleIface):
             redirected=True
         )
 
-    @_mysql_exception_handling_context
+    @_mysql_async_exception_handling_context
     async def finish_crawling_with_delay(self, original_url: CrawledURLHandleIface, delay_seconds: int) -> None:
         assert (self._state == self.__class__._ModuleState.OPERATIONAL)
         assert (isinstance(original_url, _MySQLCrawledURLHandle) and (not original_url.is_redirected()))
@@ -326,7 +327,7 @@ class MySQLDatabaseModule(DatabaseModuleIface):
             )
             success_flag_carrier.set(True)  # If all the previous code succeeds... (i.e. it does not raise an exception)
 
-    @_mysql_exception_handling_context
+    @_mysql_async_exception_handling_context
     async def finish_crawling_with_error(self, original_url: CrawledURLHandleIface, redirected_url: Optional[CrawledURLHandleIface], error_reason: CrawlingErrorReason) -> None:
         assert (self._state == self.__class__._ModuleState.OPERATIONAL)
         assert (isinstance(original_url, _MySQLCrawledURLHandle) and (not original_url.is_redirected()))
@@ -348,7 +349,7 @@ class MySQLDatabaseModule(DatabaseModuleIface):
                 )
             success_flag_carrier.set(True)  # If all the previous code succeeds... (i.e. it does not raise an exception)
 
-    @_mysql_exception_handling_context
+    @_mysql_async_exception_handling_context
     async def finish_crawling_with_success(self, original_url: CrawledURLHandleIface, redirected_url: Optional[CrawledURLHandleIface], validated_document: DocumentContainer) -> None:
         assert (self._state == self.__class__._ModuleState.OPERATIONAL)
         assert (isinstance(original_url, _MySQLCrawledURLHandle) and (not original_url.is_redirected()))
