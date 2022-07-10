@@ -91,7 +91,8 @@ liable for any damages or legal issues caused by this program and its use!**
 
 ### Docker
 
-**Coming soon!**
+The necessary files and documentation related to deploying this program using Docker are in the
+**[spideriment-ng-docker](https://github.com/vitlabuda/spideriment-ng-docker)** repository.
 
 
 
