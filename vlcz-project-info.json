@@ -3,7 +3,7 @@
   "display_name": "Spideriment-NG",
   "description": null,
   "programming_language": "Python",
-  "priority": 1300,
+  "priority": 1100,
   "category_id": "servers-daemons",
   "category_display_name": "Servers & daemons",
   "category_priority": 1500
